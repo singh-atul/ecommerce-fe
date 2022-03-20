@@ -5,6 +5,7 @@ import '../styles/productList.css';
 
 const BASE_URL = 'http://localhost:8080';
 
+var ReqUrl=BASE_URL + '/ecomm/api/v1/products';
 function ProductList() {
 	const [categoryList, setCategoryList] = useState([]);
 	const [productList, setProductList] = useState([]);
@@ -13,45 +14,24 @@ function ProductList() {
 	const [minPrice, setMinPrice] = useState(0);
 	const [maxPrice, setMaxPrice] = useState(-1);
 	const [searchQuery, setSearchQuery] = useState('');
-
+	// const [ReqUrl, setReqUrl] = useState('');
+	
+	
 	useEffect(() => {
 		const data = {
 			token: localStorage.getItem("token")
 		};
 		setUsername(localStorage.getItem("username"));
 		
-		// axios.get(BASE_URL + '/ecomm/api/v1/categories/', { params: { answer: 42 } })
-        //     .then(response=>{
-                
-        //             setCategoryList(response.data);
-                
-        //     })
-
-		// axios.get(BASE_URL + '/ecomm/api/v1/categories/')
-		// 	.then(function(response) {
-		// 		console.log('Axios Response: ', response);
-		// 	})
-		// 	.catch(function(error) {
-		// 		console.log('Axios Error: ', error);
-		// 	});
-
-		// axios.post(BASE_URL + '/api/v1/category/all', data)
-		// 	.then(function (response) {
-		// 		if (response.data.success) {
-		// 			setCategoryList(response.data.categories);
-		// 		}
-		// 	})
-		// 	.catch(function (error) {
-		// 		console.log(error);
-		// 	});
-
-		// if (currentCategory) {
-
-		// }
 		if (window.location.search) {
 			setCurrentCategory(window.location.search.split("=")[1]);
 			data.categoryId = window.location.search.split("=")[1];
 		}
+			if(data.categoryId)
+				ReqUrl = BASE_URL + '/ecomm/api/v1/categories/'+data.categoryId+'/products';
+			else
+				ReqUrl=BASE_URL + '/ecomm/api/v1/products';
+
 		fetchProducts(data);
 	}, []);
 
@@ -70,7 +50,7 @@ function ProductList() {
 	}
 
 	const fetchProducts = (data) => {
-		axios.get(BASE_URL + '/ecomm/api/v1/products', {
+		axios.get(ReqUrl, {
 			params: data
 		})
             .then(response=>{
@@ -115,7 +95,7 @@ function ProductList() {
 	}
 
 	const clearFilter = () => {
-		window.location.href = "/products";
+		window.location.reload(true);
 	}
 
 	const logoutFn = () => {
@@ -136,7 +116,7 @@ function ProductList() {
 								<Link className="text-decoration-none" to={"/home"}>Ecommerce</Link>
 							</div>
 							<div className="user-actions d-flex flex-row">
-								<Link className="text-decoration-none" to={"/account"}>Account</Link>
+								{/* <Link className="text-decoration-none" to={"/account"}>Account</Link> */}
 								<Link className="text-decoration-none" to={"/cart"}>Cart</Link>
 								<div className="user-intro">Hi {username}</div>
 								<div className="logout-btn" onClick={logoutFn}>Logout</div>

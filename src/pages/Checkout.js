@@ -16,9 +16,12 @@ function Checkout() {
             userId: localStorage.getItem("userId"),
             token: localStorage.getItem("token")
         };
-        const cartId=1;
+        const cartId=localStorage.getItem("cartId");
         axios.get(BASE_URL + '/ecomm/api/v1/carts/'+cartId, {
-            params: data
+            params: data,
+            headers: {
+                'x-access-token': localStorage.getItem("token")
+              }
         })
             .then(response=>{
                 setOrderDetails(response.data);
@@ -66,7 +69,7 @@ function Checkout() {
                                 <Link className="text-decoration-none" to={"/home"}>Ecommerce</Link>
                             </div>
                             <div className="user-actions d-flex flex-row">
-                                <Link className="text-decoration-none" to={"/account"}>Account</Link>
+                                {/* <Link className="text-decoration-none" to={"/account"}>Account</Link> */}
                                 <Link className="text-decoration-none" to={"/cart"}>Cart</Link>
                                 <div className="user-intro">Hi {username}</div>
                                 <div className="logout-btn" onClick={logoutFn}>Logout</div>
@@ -90,7 +93,6 @@ function Checkout() {
                                         <div className="order-details-product-data d-flex flex-column">
                                             <div>{product.name}</div>
                                             <div>₹ {product.cost}</div>
-                                            <div>Quantity : {product.quantity}</div>
                                         </div>
                                     </div>
                                 ))

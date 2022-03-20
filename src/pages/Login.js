@@ -7,10 +7,12 @@ const BASE_URL = 'http://localhost:8080';
 
 function Login() {
     const [showSignup, setShowSignup] = useState(false);
+    const [message,setAuthMessage] = useState('')
+    
     const loginFn = () => {
         const username = document.getElementById("username");
         const password = document.getElementById("password");
-
+        setAuthMessage('');
         const data = {
             username: username.value,
             password: password.value
@@ -19,15 +21,34 @@ function Login() {
         axios.post(BASE_URL + '/ecomm/api/v1/auth/signin', data)
             .then(function (response) {
                 if (response.status==200) {
-                    
                     localStorage.setItem("username", response.data.username)
-                    localStorage.setItem("userId", response.data.userId);
+                    localStorage.setItem("userId", response.data.id);
                     localStorage.setItem("token", response.data.accessToken);
-                    window.location.href = "/home";
+                    //Create Cart
+                    axios.post(BASE_URL + '/ecomm/api/v1/carts', {
+                        userId:response.data.id},
+                    {
+                        headers: {
+                            'x-access-token': response.data.accessToken 
+                          }
+                        
+                    }).then(function(response_){
+                        localStorage.setItem("cartId", response_.data.id);
+                        window.location.href = "/home";    
+                    }).catch(function(error){
+                        console.log(error)
+                    })
+                
+                    
+                }
+                else{
+                    setAuthMessage("Invalid username or password")
                 }
             })
             .catch(function (error) {
-                console.log(error);
+                if(error.response.status==404){
+                    setAuthMessage(error.response.data.message)
+                }
             });
     }
 
@@ -35,24 +56,21 @@ function Login() {
         const username = document.getElementById("username");
         const password = document.getElementById("password");
         const email = document.getElementById("email");
-        
+        setAuthMessage('');
 
         const data = {
             username: username.value,
             password: password.value,
             email: email.value
         };
-        console.log(data);
         axios.post(BASE_URL + '/ecomm/api/v1/auth/signup', data)
             .then(function (response) {
                 if (response.status==200) {
-                    // localStorage.setItem("username", response.data.username)
-                    // localStorage.setItem("userId", response.data.data.userId);
-                    // localStorage.setItem("token", response.data.data.token);
                     window.location.href = "/";
                 }
             })
             .catch(function (error) {
+                setAuthMessage(error.response.data.message)
                 console.log(error);
             });
     }
@@ -89,10 +107,13 @@ function Login() {
                                         <input type="password" className="form-control" placeholder="Password" id="password" />
                                     </div>
                                     <div className="input-group">
+                                        <input type="text" className="form-control" placeholder="Email" id="email" />
+                                    </div>
+                                    <div className="input-group">
                                         <input type="submit" className="form-control btn btn-primary" value="Log in as User" onClick={loginFn} />
                                     </div>
                                     <div className="signup-btn text-center text-info" onClick={toggleSignup}>Dont have an Account ? Signup</div>
-                                    <div className="auth-error-msg text-danger text-center"></div>
+                                    <div className="auth-error-msg text-danger text-center">{message}</div>
                                 </div>
                             ) : (
                                 <div className="login-wrapper">
@@ -112,7 +133,7 @@ function Login() {
                                         <input type="submit" className="form-control btn btn-primary" value="Sign up as User" onClick={signupFn} />
                                     </div>
                                     <div className="signup-btn text-center text-info" onClick={toggleSignup}>Already have an Account ? Login</div>
-                                    <div className="auth-error-msg text-danger text-center"></div>
+                                    <div className="auth-error-msg text-danger text-center">{message}</div>
                                 </div>
                             )
                         }

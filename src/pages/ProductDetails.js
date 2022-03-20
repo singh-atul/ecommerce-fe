@@ -26,38 +26,48 @@ function ProductDetails() {
                 console.log(error);
         });
         
-        // axios.post(BASE_URL + '/ecomm/api/v1/products/', data)
-        //     .then(function (response) {
-        //         if (response.data.success) {
-        //             setProductDetails(response.data.productDetails);
-        //         }
-        //     })
-        //     .catch(function (error) {
-        //         console.log(error);
-        //     });
     }, []);
 
     const addToCart = () => {
         const productId = window.location.pathname.split('/')[2];
-        const cartId=1;
+        const cartId=localStorage.getItem("cartId");
         const data = {
-            productIds:productId,
-            userId: 1,//localStorage.getItem("userId"),
+            productIds:[productId],
+            userId: localStorage.getItem("userId"),
             token: localStorage.getItem("token"),
             id:cartId
         };
 
+        axios.get(BASE_URL + "/ecomm/api/v1/carts/"+cartId , {
+            headers: {
+                'x-access-token':  localStorage.getItem("token")
+              }
+            
+        }).then(response=>{
+            response.data.productsSelected.forEach(element => {
+                data.productIds.push(element.id)
+            }); 
+            axios.put(BASE_URL + '/ecomm/api/v1/carts/'+cartId,data,{
+                headers: {
+                    'x-access-token': localStorage.getItem("token")
+                  }
+                
+            }
+            )
+                .then(function (response) {
+                    const newProductDetails = { ...productDetails };
+                    newProductDetails.addedToCart = 1;
+                    setProductDetails(newProductDetails)
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }).catch(function(error){
+            console.log(error);
+        });
+
+
         
-        axios.put(BASE_URL + '/ecomm/api/v1/carts/'+cartId,data
-        )
-            .then(function (response) {
-                const newProductDetails = { ...productDetails };
-                newProductDetails.addedToCart = 1;
-                setProductDetails(newProductDetails)
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
         
     }
 
@@ -79,7 +89,7 @@ function ProductDetails() {
                                 <Link className="text-decoration-none" to={"/home"}>Ecommerce</Link>
                             </div>
                             <div className="user-actions d-flex flex-row">
-                                <Link className="text-decoration-none" to={"/account"}>Account</Link>
+                                {/* <Link className="text-decoration-none" to={"/account"}>Account</Link> */}
                                 <Link className="text-decoration-none" to={"/cart"}>Cart</Link>
                                 <div className="user-intro">Hi {username}</div>
                                 <div className="logout-btn" onClick={logoutFn}>Logout</div>

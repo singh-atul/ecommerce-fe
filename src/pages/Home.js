@@ -30,17 +30,7 @@ function Home() {
                     setCategoryList(response.data);
                 
             })
-        // axios.get(BASE_URL + '/ecomm/api/v1/categories/', data)
-        //     .then(function (response) {
-        //         console.log(response);
-        //         if (response.data.success) {
 
-        //             setCategoryList(response.data.categories);
-        //         }
-        //     })
-        //     .catch(function (error) {
-        //         console.log(error);
-        //     });
     }, []);
 
     return (
@@ -53,7 +43,7 @@ function Home() {
                                 <Link className="text-decoration-none" to={"/home"}>Ecommerce</Link>
                             </div>
                             <div className="user-actions d-flex flex-row">
-                                <Link className="text-decoration-none" to={"/account"}>Account</Link>
+                                {/* <Link className="text-decoration-none" to={"/account"}>Account</Link> */}
                                 <Link className="text-decoration-none" to={"/cart"}>Cart</Link>
                                 <div className="user-intro">Hi {username}</div>
                                 <div className="logout-btn" onClick={logoutFn}>Logout</div>
@@ -71,6 +61,8 @@ function Home() {
                                 <Link className="text-decoration-none text-white" to={"/products"}>All Products</Link>
                             </div>
                             {
+
+
                                 categoryList.map((category) => (
                                     <div key={category.id} className="category-item rounded-3 d-flex justify-content-center align-items-center">
                                         <Link to={`/products${category.id ? `?categoryId=${category.id}` : ''}`} className="text-decoration-none text-white">{category.name}</Link>

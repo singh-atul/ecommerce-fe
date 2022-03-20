@@ -6,65 +6,53 @@ import '../styles/cart.css';
 
 const BASE_URL = 'http://localhost:8080';
 
+
 function Cart() {
     const [orderDetails, setOrderDetails] = useState({});
     const [username, setUsername] = useState('User');
+    const [cartId, setCartId] = useState('');
 
     useEffect(() => {
         setUsername(localStorage.getItem("username"));
+        setCartId(localStorage.getItem("cartId"));
         fetchOrderDetails();
     }, []);
 
-    const updateProductQuantity = (e, productId) => {
+
+    const removeProductFromCart = (productId) => {
         const data = {
-            productId,
-            quantity: e.target.value,
-            orderId: orderDetails.orderId,
-            userId: 1,//localStorage.getItem('userId'),
+            productIds:[],
+            userId: localStorage.getItem("userId"),
             token: localStorage.getItem("token"),
-            id:1
+            id:cartId
         };
 
-        axios.get(BASE_URL + '/ecomm/api/v1/carts/', {
-            params: data
-        })
-            .then(response=>{
-                fetchOrderDetails();       
-            }).catch(function (error) {
-                console.log(error);
+        axios.get(BASE_URL + "/ecomm/api/v1/carts/"+cartId,{
+            headers: {
+                'x-access-token': localStorage.getItem("token")
+              }
+            
+        }).then(response=>{
+            response.data.productsSelected.forEach(element => {
+                if(productId!= element.id)
+                    data.productIds.push(element.id)
+            }); 
+            axios.put(BASE_URL + '/ecomm/api/v1/carts/'+cartId,data,{
+                headers: {
+                    'x-access-token': localStorage.getItem("token")
+                  }
+                
+            }
+            )
+                .then(function (response) {
+                    fetchOrderDetails()
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }).catch(function(error){
+            console.log(error);
         });
-
-
-        // axios.post(BASE_URL + '/api/v1/order/edit', data)
-        //     .then(function (response) {
-        //         if (response.data.success) {
-        //             fetchOrderDetails();
-        //         }
-        //     })
-        //     .catch(function (error) {
-        //         console.log(error);
-        //     });
-    }
-
-    const removeProductFromCart = (productId, quantity) => {
-        const data = {
-            productId,
-            quantity,
-            orderId: orderDetails.orderId,
-            userId: localStorage.getItem('userId'),
-            remove: true,
-            token: localStorage.getItem("token")
-        };
-
-        axios.post(BASE_URL + '/api/v1/order/edit', data)
-            .then(function (response) {
-                if (response.data.success) {
-                    fetchOrderDetails();
-                }
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
 
     }
 
@@ -74,24 +62,19 @@ function Cart() {
             token: localStorage.getItem("token")
         };
 
-        const cartId=1;
-        axios.get(BASE_URL + '/ecomm/api/v1/carts/'+cartId, {
-            params: data
+        axios.get(BASE_URL + '/ecomm/api/v1/carts/'+localStorage.getItem("cartId"), {
+            params: data,
+            headers: {
+                'x-access-token': localStorage.getItem("token")
+              }
+            
         })
             .then(response=>{
                 setOrderDetails(response.data);
             }).catch(function (error) {
                 console.log(error);
         });
-        // axios.post(BASE_URL + '/api/v1/order/details', data)
-        //     .then(function (response) {
-        //         if (response.data.success) {
-        //             setOrderDetails(response.data.orderDetails);
-        //         }
-        //     })
-        //     .catch(function (error) {
-        //         console.log(error);
-        //     });
+
     }
 
     const logoutFn = () => {
@@ -112,7 +95,7 @@ function Cart() {
                                 <Link className="text-decoration-none" to={"/home"}>Ecommerce</Link>
                             </div>
                             <div className="user-actions d-flex flex-row">
-                                <Link className="text-decoration-none" to={"/account"}>Account</Link>
+                                {/* <Link className="text-decoration-none" to={"/account"}>Account</Link> */}
                                 <Link className="text-decoration-none" to={"/cart"}>Cart</Link>
                                 <div className="user-intro">Hi {username}</div>
                                 <div className="logout-btn" onClick={logoutFn}>Logout</div>
@@ -138,7 +121,7 @@ function Cart() {
                                             <div>₹ {product.cost}</div>
                                         </div>
                                         <div className="order-details-product-actions d-flex flex-column">
-                                            <div className="order-details-product-quantity">
+                                            {/* <div className="order-details-product-quantity">
                                                 <div className="fw-bold">Quantity</div>
                                                 <div className="form-group">
                                                     <select
@@ -155,8 +138,8 @@ function Cart() {
                                                         <option value="5">5</option>
                                                     </select>
                                                 </div>
-                                            </div>
-                                            <div className="order-details-product-remove btn btn-info" onClick={() => removeProductFromCart(product.id, product.quantity)}>Remove</div>
+                                            </div> */}
+                                            <div className="order-details-product-remove btn btn-info" onClick={() => removeProductFromCart(product.id)}>Remove</div>
                                         </div>
                                     </div>
                                 )) : (
